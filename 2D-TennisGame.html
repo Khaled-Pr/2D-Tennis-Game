@@ -1,0 +1,217 @@
+<html>
+
+<canvas id="myCanvas" width="600" height ="500"></canvas>
+
+<script>
+var board;
+var boardCharacteristics;
+var ballX =30; //ball position in x-axis
+var ballY =30; //ball position in y-axix
+var horizontalSpeed =10;
+var verticalSpeed =10;
+var winingScore = 5;
+var winerMessage = false;
+
+
+
+
+//Racket characteristics
+var racket1Postion =myCanvas.height/2; //the initial position of the racket in the left y-axis
+var racket2Postion =myCanvas.height/2; //the initial position of the racket in the right y-axis
+// Racket thikness
+const racketThikness = 10;
+// Racket height
+const racketSize = 100; //the size of the racket and it should be constant
+
+// Players Score
+var player1Score = 0;
+var player2Score = 0;
+
+//a function to track the mouse postion
+function mousePostion(evt){
+         var rect = myCanvas.getBoundingClientRect();
+		 var root = document.documentElement;
+		 var mouseX = evt.clientX - rect.left -root.scrollLeft;
+		 var mouseY = evt.clientY - rect.top - root.scrollTop;
+		 return{
+		 x:mouseX,
+		 y:mouseY}
+}
+
+function handelMouseClick(evt){
+         if(winerMessage){
+		     player1Score = 0;
+			 player2Score = 0;
+			 winerMessage = false;
+		 }
+}
+
+window.onload = function() {
+       board = document.getElementById('myCanvas');
+	   boardCharacteristics = board.getContext('2d');
+	   var framePerSecond =30;
+	   setInterval(function(){architecture();
+	   movement();}
+	   , 1000/framePerSecond);
+	   
+	   myCanvas.addEventListener('mousedown', handelMouseClick)
+	   myCanvas.addEventListener('mousemove', function(evt){
+	                                          var mousePos = mousePostion(evt);
+											  racket1Postion = mousePos.y-(racketSize/2);
+	   })
+	   
+
+	   
+}
+
+function playerMachineMov(){
+
+          var racket2Center = racket2Postion +(racketSize/2);
+         if (racket2Center < ballY-30){
+		    racket2Postion = racket2Postion + 15;
+			
+		 }else{
+		    racket2Postion = racket2Postion - 15;
+		 }
+}
+
+function architecture(){
+       //to make the field (board) color Green
+	        //before using updateFillRect
+	        //boardCharacteristics.fillStyle = 'Green';
+	        //boardCharacteristics.fillRect(0,0, board.width,board.width);
+	        //after using updateFillRect
+	   updateFillRect(0,0, board.width,board.height,'Green');
+	   
+//Drwing the middle line	   
+var c = document.getElementById("myCanvas");
+var boardCharacteristics = c.getContext("2d");
+boardCharacteristics.lineWidth = 5;
+boardCharacteristics.strokeStyle = "white";
+boardCharacteristics.setLineDash([10, 5]);
+	   
+boardCharacteristics.beginPath();
+boardCharacteristics.arc(300, 250, 50, 0, 2 * Math.PI);
+boardCharacteristics.moveTo(300, 0);
+boardCharacteristics.lineTo(300, 500);
+boardCharacteristics.stroke();
+
+
+	   if(winerMessage){
+	      //these two lines of code are just for styling	   
+          boardCharacteristics.font="50px Comic Sans MS";
+          boardCharacteristics.fillStyle = "red";
+		  
+	                if(player1Score >= winingScore){
+				      boardCharacteristics.fillText("Left player won ^^ ", 300, 250);
+					}else if(player2Score >= winingScore){
+					  boardCharacteristics.fillText("Right player won ^^ ", 300, 250);
+					}
+
+		  
+          boardCharacteristics.textAlign = "center";		  
+	      boardCharacteristics.fillText("Click to play again", 300, 400);
+	   return;
+         }
+	   //to draw the ball and make it in yellow color
+	        //boardCharacteristics.fillStyle = 'yellow';
+	        //boardCharacteristics.fillRect(ballX,15, 10,10);
+	  /* updateFillRect(ballX,15, 10,10,'yellow');
+	   // making the ballX looks really in round shape
+	   boardCharacteristics.beginPath();
+	   boardCharacteristics.arc(ballX, 20,20,0, Math.PI*2,true);
+	   boardCharacteristics.fill();*/
+	   //after using the function updateCircleChar 
+	   updateCircleChar(ballX, ballY,10, 'yellow')
+	   
+	        // to draw the right and left paddles and make them in red color
+	        //boardCharacteristics.fillStyle = 'red';
+	   //boardCharacteristics.fillRect(0,220, 10,200);
+	   updateFillRect(0,racket1Postion, racketThikness,racketSize,'red');
+	       //boardCharacteristics.fillStyle = 'red';
+	       //boardCharacteristics.fillRect(590,220, 10,200);
+	   updateFillRect(board.width- racketThikness,racket2Postion, racketThikness,racketSize,'red');
+
+	   // Players Scores 
+	   boardCharacteristics.font = "30px Comic Sans MS";
+
+	   boardCharacteristics.fillText(player1Score, 50, 90);
+	   boardCharacteristics.fillText(player2Score, 540, 90);
+	   
+}
+function RestBall(){
+         if(player1Score >= winingScore || player2Score >= winingScore){
+		 	   boardCharacteristics.fillText(" winner", 250, 250);
+
+
+		  winerMessage = true;
+
+		 } 
+		horizontalSpeed = -horizontalSpeed;
+		horizontalSpeed = -horizontalSpeed;
+        ballX = myCanvas.width/2;
+		ballY = myCanvas.height/2;
+
+}
+function movement(){
+        if(winerMessage){
+		return;
+		}
+	   playerMachineMov();
+       // movement in x-axis
+       ballX = ballX + horizontalSpeed;
+	   	   // movement in y-axis
+       ballY = ballY + verticalSpeed;
+
+        //horizontaly
+	   	  // horizontalSpeed = horizontalSpeed+1; 
+       if (ballX < 0){ 
+	                   if(ballY > racket1Postion && ballY < racket1Postion + racketSize )
+					     {
+					    		horizontalSpeed = -horizontalSpeed;
+								var positionY = ballY - (racket1Postion+racketSize/2)
+								verticalSpeed = positionY * .40;
+   						 }else{
+						 	   player2Score = player2Score + 1;
+						       RestBall();
+						
+						      }
+	   }
+	   if (ballX > myCanvas.width){ 
+	   	                   if(ballY > racket2Postion && ballY < racket2Postion + racketSize )
+					        {
+					    		horizontalSpeed = -horizontalSpeed;
+								var positionY = ballY - (racket2Postion+racketSize/2)
+								verticalSpeed = positionY * .10;   						  
+							}else{
+							   player1Score = player1Score + 1;
+						       RestBall();
+
+						         }
+		}
+	   
+	   // vertically 
+       if (ballY < 0){ verticalSpeed = -verticalSpeed;}
+	   if (ballY > myCanvas.height){ verticalSpeed = -verticalSpeed;}
+	   
+	   
+	   
+}
+
+// a function  to update the fillRect to reduce the code length
+//ex:  boardCharacteristics.fillRect(0,0, board.width,board.width);
+// becomes ;  updateFillRect(0,0, board.width,board.width, fillingColor);
+function updateFillRect(x,y, width,height,fillingColor){
+	   boardCharacteristics.fillStyle = fillingColor;
+	   boardCharacteristics.fillRect(x,y, width,height);
+} 
+
+//a function just to simplify the drwing of the circle 
+function updateCircleChar(x,y, radius, ballColor){
+       boardCharacteristics.fillStyle = ballColor;	 
+	   // making the ball looks really in round shape
+	   boardCharacteristics.beginPath();
+	   boardCharacteristics.arc(x, y,radius,0, Math.PI*2,true);
+	   boardCharacteristics.fill();}
+</script>
+</html>
